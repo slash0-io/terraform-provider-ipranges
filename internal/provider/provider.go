@@ -12,27 +12,27 @@ import (
 )
 
 // DefaultFeedURL is the public feed. Overridable via the feed_url provider
-// attribute or the EGRESS_FEED_URL environment variable (attribute wins).
+// attribute or the IPRANGES_FEED_URL environment variable (attribute wins).
 const DefaultFeedURL = "https://feed.slash0.io/v1"
 
-var _ provider.Provider = (*egressProvider)(nil)
+var _ provider.Provider = (*iprangesProvider)(nil)
 
 func New(version string) func() provider.Provider {
-	return func() provider.Provider { return &egressProvider{version: version} }
+	return func() provider.Provider { return &iprangesProvider{version: version} }
 }
 
-type egressProvider struct{ version string }
+type iprangesProvider struct{ version string }
 
 type providerModel struct {
 	FeedURL types.String `tfsdk:"feed_url"`
 }
 
-func (p *egressProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "egress"
+func (p *iprangesProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "ipranges"
 	resp.Version = p.version
 }
 
-func (p *egressProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *iprangesProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Data sources for third-party service IP ranges (Stripe, GitHub, Datadog, ...), " +
 			"backed by a versioned public feed built exclusively from each vendor's official publication.",
@@ -40,33 +40,33 @@ func (p *egressProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 			"feed_url": schema.StringAttribute{
 				Optional: true,
 				Description: "Feed base URL (the directory containing index.json). Supports http(s):// and file://. " +
-					"Defaults to the EGRESS_FEED_URL environment variable, then the public feed.",
+					"Defaults to the IPRANGES_FEED_URL environment variable, then the public feed.",
 			},
 		},
 	}
 }
 
-func (p *egressProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+func (p *iprangesProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	var cfg providerModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &cfg)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 	feedURL := DefaultFeedURL
-	if v := os.Getenv("EGRESS_FEED_URL"); v != "" {
+	if v := os.Getenv("IPRANGES_FEED_URL"); v != "" {
 		feedURL = v
 	}
 	if !cfg.FeedURL.IsNull() && cfg.FeedURL.ValueString() != "" {
 		feedURL = cfg.FeedURL.ValueString()
 	}
-	client := NewFeedClient(feedURL, "terraform-provider-egress/"+p.version)
+	client := NewFeedClient(feedURL, "terraform-provider-ipranges/"+p.version)
 	resp.DataSourceData = client
 }
 
-func (p *egressProvider) DataSources(context.Context) []func() datasource.DataSource {
+func (p *iprangesProvider) DataSources(context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{NewRangesDataSource, NewServicesDataSource}
 }
 
-func (p *egressProvider) Resources(context.Context) []func() resource.Resource {
+func (p *iprangesProvider) Resources(context.Context) []func() resource.Resource {
 	return nil
 }

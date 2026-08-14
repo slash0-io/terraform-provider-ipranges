@@ -1,14 +1,14 @@
-# egress_services (Data Source)
+# ipranges_services (Data Source)
 
 The feed catalog: every service with published, pinnable IP ranges.
 
 ## Example Usage
 
 ```terraform
-data "egress_services" "catalog" {}
+data "ipranges_services" "catalog" {}
 
 output "catalog" {
-  value = [for s in data.egress_services.catalog.services : "${s.slug} (${s.classification})"]
+  value = [for s in data.ipranges_services.catalog.services : "${s.slug} (${s.classification})"]
 }
 ```
 

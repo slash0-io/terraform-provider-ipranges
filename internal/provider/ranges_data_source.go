@@ -33,8 +33,11 @@ type rangesModel struct {
 	GeneratedAt    types.String `tfsdk:"generated_at"`
 }
 
+// The Terraform name is <provider>_service while the Go identifiers here stay
+// ranges*: internally "ranges" and "services" is a clearer pair to read than
+// "service" and "services", which differ by one character at every call site.
 func (d *rangesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_ranges"
+	resp.TypeName = req.ProviderTypeName + "_service"
 }
 
 func (d *rangesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -44,7 +47,7 @@ func (d *rangesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 		Attributes: map[string]schema.Attribute{
 			"service": schema.StringAttribute{
 				Required:    true,
-				Description: "Service slug, e.g. \"stripe\". Enumerate with the egress_services data source.",
+				Description: "Service slug, e.g. \"stripe\". Enumerate with the ipranges_services data source.",
 			},
 			"purpose": schema.StringAttribute{
 				Optional: true,
@@ -147,7 +150,7 @@ func (d *rangesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 func (d *rangesDataSource) suggestServices(ctx context.Context) string {
 	idx, err := d.client.Index(ctx)
 	if err != nil {
-		return "Use the egress_services data source to list the catalog."
+		return "Use the ipranges_services data source to list the catalog."
 	}
 	slugs := make([]string, 0, len(idx.Services))
 	for _, s := range idx.Services {

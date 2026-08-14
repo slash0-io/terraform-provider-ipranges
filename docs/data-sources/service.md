@@ -1,11 +1,11 @@
-# egress_ranges (Data Source)
+# ipranges_service (Data Source)
 
 Current published IP ranges for one service purpose. Ranges refresh on every `terraform plan`/`apply`.
 
 ## Example Usage
 
 ```terraform
-data "egress_ranges" "stripe_api" {
+data "ipranges_service" "stripe_api" {
   service = "stripe"
   purpose = "api"
 }
@@ -15,7 +15,7 @@ resource "aws_security_group_rule" "stripe_egress" {
   from_port         = 443
   to_port           = 443
   protocol          = "tcp"
-  cidr_blocks       = data.egress_ranges.stripe_api.ipv4_cidrs
+  cidr_blocks       = data.ipranges_service.stripe_api.ipv4_cidrs
   security_group_id = aws_security_group.app.id
 }
 ```
@@ -24,7 +24,7 @@ resource "aws_security_group_rule" "stripe_egress" {
 
 ### Required
 
-- `service` (String) Service slug, e.g. `stripe`. See the [service catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md) for all available slugs, or enumerate with `egress_services`.
+- `service` (String) Service slug, e.g. `stripe`. See the [service catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md) for all available slugs, or enumerate with `ipranges_services`.
 
 ### Optional
 
@@ -40,5 +40,5 @@ resource "aws_security_group_rule" "stripe_egress" {
 - `name` (String) Human-readable service name.
 - `sync_token` (String) Feed sync token at generation time.
 
-~> Every CIDR consumes one security-group rule (default quota: 60 per SG, IPv4/IPv6 counted separately). Ranges are losslessly aggregated, so coverage is never widened. Check a purpose's entry counts in the [catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md) or via `egress_services` before wiring large purposes into SGs; 1,000+ entry purposes belong in firewall rule groups, not security groups.
+~> Every CIDR consumes one security-group rule (default quota: 60 per SG, IPv4/IPv6 counted separately). Ranges are losslessly aggregated, so coverage is never widened. Check a purpose's entry counts in the [catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md) or via `ipranges_services` before wiring large purposes into SGs; 1,000+ entry purposes belong in firewall rule groups, not security groups.
 - `generated_at` (String) Feed generation timestamp (RFC 3339).

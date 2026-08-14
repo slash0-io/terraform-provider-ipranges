@@ -29,6 +29,7 @@ body:
       options:
         - Compliance (PCI DSS / SOC 2 / other audit)
         - Data-exfiltration / egress lockdown
+        - Locking down inbound (webhook receivers, monitoring probes)
         - Replacing hand-maintained IP rules
         - Other
   - type: input

@@ -1,6 +1,6 @@
 # Build output
 bin/
-/terraform-provider-egress
+/terraform-provider-ipranges
 *.test
 
 # Terraform (examples/dev)

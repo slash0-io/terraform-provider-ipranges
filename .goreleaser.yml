@@ -3,6 +3,12 @@
 # platform, SHA256SUMS, detached GPG signature, and the registry manifest.
 version: 2
 
+# Pinned rather than inferred. GoReleaser derives ProjectName from the repo
+# directory, and the binary must be named terraform-provider-<name>_v<version>
+# or the registry rejects the release. Stating it here means a build from a
+# clone with any directory name still produces the right artifact.
+project_name: terraform-provider-ipranges
+
 before:
   hooks:
     - go mod tidy

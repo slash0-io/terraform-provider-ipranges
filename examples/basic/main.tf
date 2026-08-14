@@ -1,44 +1,44 @@
 terraform {
   required_providers {
-    egress = {
-      source = "slash0-io/egress"
+    ipranges = {
+      source = "slash0-io/ipranges"
     }
   }
 }
 
-# feed_url is resolved from (in order): this block, EGRESS_FEED_URL, the
+# feed_url is resolved from (in order): this block, IPRANGES_FEED_URL, the
 # public feed default.
-provider "egress" {}
+provider "ipranges" {}
 
 # Stripe's API endpoints — the ranges your workloads connect out to.
-data "egress_ranges" "stripe_api" {
+data "ipranges_service" "stripe_api" {
   service = "stripe"
   purpose = "api"
 }
 
 # GitHub webhook sources — direction is "ingress": these belong in ingress
 # rules on whatever receives your webhooks, not in egress rules.
-data "egress_ranges" "github_hooks" {
+data "ipranges_service" "github_hooks" {
   service = "github"
   purpose = "hooks"
 }
 
-data "egress_services" "catalog" {}
+data "ipranges_services" "catalog" {}
 
 output "stripe_api_ipv4" {
-  value = data.egress_ranges.stripe_api.ipv4_cidrs
+  value = data.ipranges_service.stripe_api.ipv4_cidrs
 }
 
 output "stripe_direction" {
-  value = data.egress_ranges.stripe_api.direction
+  value = data.ipranges_service.stripe_api.direction
 }
 
 output "github_hooks_cidrs" {
-  value = data.egress_ranges.github_hooks.cidrs
+  value = data.ipranges_service.github_hooks.cidrs
 }
 
 output "catalog_size" {
-  value = length(data.egress_services.catalog.services)
+  value = length(data.ipranges_services.catalog.services)
 }
 
 # The real-world shape: an egress security group rule fed by the data source.
@@ -49,7 +49,7 @@ output "catalog_size" {
 #   from_port         = 443
 #   to_port           = 443
 #   protocol          = "tcp"
-#   cidr_blocks       = data.egress_ranges.stripe_api.ipv4_cidrs
+#   cidr_blocks       = data.ipranges_service.stripe_api.ipv4_cidrs
 #   security_group_id = aws_security_group.app.id
-#   description       = "Stripe API (managed by egress feed ${data.egress_ranges.stripe_api.sync_token})"
+#   description       = "Stripe API (managed by the slash0 feed ${data.ipranges_service.stripe_api.sync_token})"
 # }

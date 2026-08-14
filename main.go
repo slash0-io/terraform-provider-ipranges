@@ -1,4 +1,4 @@
-// terraform-provider-egress: Terraform data sources for third-party service
+// terraform-provider-ipranges: Terraform data sources for third-party service
 // IP ranges, backed by a versioned public feed of vendor-published ranges.
 package main
 
@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 
-	"github.com/slash0-io/terraform-provider-egress/internal/provider"
+	"github.com/slash0-io/terraform-provider-ipranges/internal/provider"
 )
 
 // version is set by goreleaser at build time.
@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	err := providerserver.Serve(context.Background(), provider.New(version), providerserver.ServeOpts{
-		Address: "registry.terraform.io/slash0-io/egress",
+		Address: "registry.terraform.io/slash0-io/ipranges",
 		Debug:   debug,
 	})
 	if err != nil {

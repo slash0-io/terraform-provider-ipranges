@@ -1,5 +1,18 @@
 # terraform-provider-egress
 
+> **This provider has been renamed to [`slash0-io/ipranges`](https://registry.terraform.io/providers/slash0-io/ipranges/latest).** `slash0-io/egress` is frozen at this version and receives no further updates. The name changed because slightly over half the catalog's purposes are inbound ranges, and 27 services publish inbound ranges only, so a name describing outbound traffic described a minority of what the provider returns.
+
+Migration is four find-and-replaces:
+
+| Old | New |
+|---|---|
+| `slash0-io/egress` | `slash0-io/ipranges` |
+| `egress_ranges` | `ipranges_service` |
+| `egress_services` | `ipranges_services` |
+| `EGRESS_FEED_URL` | `IPRANGES_FEED_URL` |
+
+Attribute names, the feed, and the data it returns are unchanged.
+
 Terraform data sources for the published IP ranges of third-party services (Stripe, GitHub, Datadog, Okta, Cloudflare, and 40+ more) so `0.0.0.0/0` never has to appear in your egress rules again.
 
 ```hcl

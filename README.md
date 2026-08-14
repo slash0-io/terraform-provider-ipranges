@@ -7,11 +7,12 @@ Migration is four find-and-replaces:
 | Old | New |
 |---|---|
 | `slash0-io/egress` | `slash0-io/ipranges` |
-| `egress_ranges` | `ipranges_service` |
+| `egress_ranges`, for a purpose the catalog marks `egress` or `both` | `ipranges_egress` |
+| `egress_ranges`, for a purpose the catalog marks `ingress` | `ipranges_ingress` |
 | `egress_services` | `ipranges_services` |
 | `EGRESS_FEED_URL` | `IPRANGES_FEED_URL` |
 
-Attribute names, the feed, and the data it returns are unchanged.
+The single ranges data source is split in two so that the direction is visible while reading a config, and so that asking for the wrong one fails at plan time. Previously, ingress ranges placed in a security group egress rule produced a rule matching no traffic and a clean apply. Attribute names, the feed, and the data returned are otherwise unchanged.
 
 Terraform data sources for the published IP ranges of third-party services (Stripe, GitHub, Datadog, Okta, Cloudflare, and 40+ more) so `0.0.0.0/0` never has to appear in your egress rules again.
 

@@ -1,21 +1,25 @@
-# ipranges_service (Data Source)
+# ipranges_egress (Data Source)
 
-Current published IP ranges for one service purpose. Ranges refresh on every `terraform plan`/`apply`.
+Ranges your workloads connect **out** to, for security group egress rules. Ranges refresh on every `terraform plan`/`apply`.
+
+Using a purpose the feed marks as `ingress` throws an error. Purposes marked `both` are accepted here and by `ipranges_ingress`.
+
+Read `direction` from the catalog rather than inferring it from the purpose key. Purpose keys often inherit the vendor's vocabulary, which is written from their side. `sentry/ingest` is named for what Sentry does with the traffic, while the connection is your workload reaching out, so it belongs here.
 
 ## Example Usage
 
 ```terraform
-data "ipranges_service" "stripe_api" {
+data "ipranges_egress" "stripe_api" {
   service = "stripe"
   purpose = "api"
 }
 
-resource "aws_security_group_rule" "stripe_egress" {
+resource "aws_security_group_rule" "stripe_api" {
   type              = "egress"
   from_port         = 443
   to_port           = 443
   protocol          = "tcp"
-  cidr_blocks       = data.ipranges_service.stripe_api.ipv4_cidrs
+  cidr_blocks       = data.ipranges_egress.stripe_api.ipv4_cidrs
   security_group_id = aws_security_group.app.id
 }
 ```
@@ -28,17 +32,17 @@ resource "aws_security_group_rule" "stripe_egress" {
 
 ### Optional
 
-- `purpose` (String) Purpose key, e.g. `api` or `webhooks`. Each service's purposes are listed in the [catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md). May be omitted only when the service publishes exactly one purpose.
+- `purpose` (String) Purpose key, e.g. `api`. Each service's purposes are listed in the [catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md). May be omitted when the service publishes exactly one egress purpose, even if it publishes others in the opposite direction.
 
 ### Read-Only
 
 - `ipv4_cidrs` (List of String) Sorted IPv4 CIDRs.
 - `ipv6_cidrs` (List of String) Sorted IPv6 CIDRs.
 - `cidrs` (List of String) `ipv4_cidrs` followed by `ipv6_cidrs`.
-- `direction` (String) `egress` = ranges you connect to (SG egress rules); `ingress` = ranges the service connects from (webhook sources, for SG ingress rules).
+- `direction` (String) The feed's direction for this purpose: `egress`, or `both` where the same ranges serve either way.
 - `classification` (String) `dedicated` | `mixed` | `cdn-shared`.
 - `name` (String) Human-readable service name.
 - `sync_token` (String) Feed sync token at generation time.
+- `generated_at` (String) Feed generation timestamp (RFC 3339).
 
 ~> Every CIDR consumes one security-group rule (default quota: 60 per SG, IPv4/IPv6 counted separately). Ranges are losslessly aggregated, so coverage is never widened. Check a purpose's entry counts in the [catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md) or via `ipranges_services` before wiring large purposes into SGs; 1,000+ entry purposes belong in firewall rule groups, not security groups.
-- `generated_at` (String) Feed generation timestamp (RFC 3339).

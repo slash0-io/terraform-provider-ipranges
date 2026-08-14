@@ -12,7 +12,7 @@ terraform {
   }
 }
 
-data "ipranges_service" "stripe_api" {
+data "ipranges_egress" "stripe_api" {
   service = "stripe"
   purpose = "api"
 }
@@ -22,12 +22,12 @@ resource "aws_security_group_rule" "stripe_api" {
   from_port         = 443
   to_port           = 443
   protocol          = "tcp"
-  cidr_blocks       = data.ipranges_service.stripe_api.ipv4_cidrs
+  cidr_blocks       = data.ipranges_egress.stripe_api.ipv4_cidrs
   security_group_id = aws_security_group.app.id
   description       = "Stripe API"
 }
 
-data "ipranges_service" "stripe_webhooks" {
+data "ipranges_ingress" "stripe_webhooks" {
   service = "stripe"
   purpose = "webhooks"
 }
@@ -37,7 +37,7 @@ resource "aws_security_group_rule" "stripe_webhooks" {
   from_port         = 443
   to_port           = 443
   protocol          = "tcp"
-  cidr_blocks       = data.ipranges_service.stripe_webhooks.ipv4_cidrs
+  cidr_blocks       = data.ipranges_ingress.stripe_webhooks.ipv4_cidrs
   security_group_id = aws_security_group.web.id
   description       = "Stripe webhook sources"
 }
@@ -56,7 +56,8 @@ The catalog records two things most sources don't model:
 
 | Data source | Purpose |
 |---|---|
-| `ipranges_service` | Current ranges for one service purpose (`stripe`/`api`, `github`/`hooks`, `datadog`/`agents`, …) |
+| `ipranges_egress` | Ranges your workloads connect **out** to (`stripe`/`api`, `datadog`/`agents`, …) |
+| `ipranges_ingress` | Ranges the service connects **in** from (`stripe`/`webhooks`, `github`/`hooks`, …) |
 | `ipranges_services` | The full catalog: slugs, purposes, directions, classifications |
 
 **→ [Browse the service catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md)** for every available slug and purpose, or visit the [feed's landing page](https://feed.slash0.io/).
@@ -72,7 +73,7 @@ Ranges are **losslessly aggregated**: published coverage is preserved exactly, n
 Patterns by scale:
 
 - **≤ 60 entries** (most SaaS purposes): a single SG works by default.
-- **60–1,000** (e.g. `stripe/api` at ~130): request a rules-per-SG quota increase, or split across up to 5 SGs on the same ENI: `chunklist(data.ipranges_service.stripe_api.ipv4_cidrs, 60)`.
+- **60–1,000** (e.g. `stripe/api` at ~130): request a rules-per-SG quota increase, or split across up to 5 SGs on the same ENI: `chunklist(data.ipranges_egress.stripe_api.ipv4_cidrs, 60)`.
 - **1,000+** (`aws/all`, `azure/all`, `github/actions`): not security-group material at all. These purposes exist for AWS Network Firewall rule groups, route tables, proxies, and audit tooling. Prefer the service-specific purposes (`aws/s3`, `azure/storage`) where they fit.
 
 ## Staying current

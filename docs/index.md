@@ -9,7 +9,7 @@ Data sources for the published IP ranges of third-party services (Stripe, GitHub
 ```terraform
 provider "ipranges" {}
 
-data "ipranges_service" "stripe_api" {
+data "ipranges_egress" "stripe_api" {
   service = "stripe"
   purpose = "api"
 }

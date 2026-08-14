@@ -64,7 +64,7 @@ func (p *iprangesProvider) Configure(ctx context.Context, req provider.Configure
 }
 
 func (p *iprangesProvider) DataSources(context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{NewRangesDataSource, NewServicesDataSource}
+	return []func() datasource.DataSource{NewEgressDataSource, NewIngressDataSource, NewServicesDataSource}
 }
 
 func (p *iprangesProvider) Resources(context.Context) []func() resource.Resource {

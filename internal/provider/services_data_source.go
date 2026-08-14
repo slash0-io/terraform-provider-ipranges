@@ -79,7 +79,7 @@ func (d *servicesDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 									"key":       schema.StringAttribute{Computed: true},
 									"direction": schema.StringAttribute{Computed: true},
 									"ipv4_count": schema.Int64Attribute{Computed: true,
-										Description: "Number of IPv4 CIDRs — the SG-rule quota cost of this purpose."},
+										Description: "Number of IPv4 CIDRs, which is the SG-rule quota cost of this purpose."},
 									"ipv6_count": schema.Int64Attribute{Computed: true,
 										Description: "Number of IPv6 CIDRs (IPv4/IPv6 SG quotas are separate)."},
 								},

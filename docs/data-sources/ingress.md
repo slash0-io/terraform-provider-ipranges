@@ -32,7 +32,7 @@ resource "aws_security_group_rule" "stripe_webhooks" {
 
 ### Optional
 
-- `purpose` (String) Purpose key, e.g. `webhooks`. Each service's purposes are listed in the [catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md). May be omitted when the service publishes exactly one ingress purpose, even if it publishes others in the opposite direction.
+- `purpose` (String) Purpose key, e.g. `webhooks`. Each service's purposes are listed in the [catalog](https://github.com/slash0-io/feed/blob/main/CATALOG.md). May be omitted when the service publishes exactly one ingress purpose, even if it publishes others in the opposite direction. Omitting it is fragile: a service gains purposes when a vendor starts publishing more detail, and the plan then fails with the available keys listed. Okta went from one purpose to sixteen this way. Naming the purpose keeps a configuration working across catalog changes, and gives a tighter allowlist than a service-wide set.
 
 ### Read-Only
 
